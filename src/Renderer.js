@@ -17,13 +17,9 @@ export default class Renderer {
   resize() {
     const vw = window.innerWidth;
     const vh = window.innerHeight;
-
-    // HUD + 进度条 + 底部栏高度
     const chrome = vw < 600 ? 100 : 120;
-    // 迷宫宽度占屏幕 88%
     const maxW = vw * 0.88;
     const maxH = vh - chrome;
-
     const scale = Math.min(maxW / this.mazeWidth, maxH / this.mazeHeight);
 
     this.canvas.width = this.mazeWidth;
@@ -68,12 +64,9 @@ export default class Renderer {
         if (grid[r][c] === CELL.WALL) continue;
         const x = c * CELL_SIZE;
         const y = r * CELL_SIZE;
-
-        // 浅色底板
         ctx.fillStyle = level.color + '10';
         ctx.fillRect(x, y, CELL_SIZE, CELL_SIZE);
-
-        ctx.strokeStyle = level.color + '18';
+        ctx.strokeStyle = level.color + '15';
         ctx.lineWidth = 0.5;
         ctx.strokeRect(x, y, CELL_SIZE, CELL_SIZE);
       }
@@ -84,37 +77,79 @@ export default class Renderer {
     const ctx = this.ctx;
     const grid = level.grid;
 
+    // 亚克力条参数（对齐 SVG 墙板块的比例）
+    const thick = CELL_SIZE * 0.55;
+    const sideGap = (CELL_SIZE - thick) / 2;
+    const endGap = 2;
+    const rx = 6;
+
+    // 第一遍：水平条（横向合并相邻墙格）
     for (let r = 0; r < this.gridRows; r++) {
-      for (let c = 0; c < this.gridCols; c++) {
-        if (grid[r][c] !== CELL.WALL) continue;
+      let start = -1;
+      for (let c = 0; c <= this.gridCols; c++) {
+        const isWall = c < this.gridCols && grid[r][c] === CELL.WALL;
+        if (isWall && start === -1) {
+          start = c;
+        } else if (!isWall && start !== -1) {
+          const x = start * CELL_SIZE + endGap;
+          const y = r * CELL_SIZE + sideGap;
+          const w = (c - start) * CELL_SIZE - endGap * 2;
+          const h = thick;
+          this._drawAcrylicStrip(ctx, x, y, w, h, rx, level.color, level.colorDark);
+          start = -1;
+        }
+      }
+    }
 
-        const x = c * CELL_SIZE;
-        const y = r * CELL_SIZE;
-
-        // 墙体主体 — 圆角效果
-        const inset = 2;
-        const wallGrad = ctx.createLinearGradient(x, y, x + CELL_SIZE, y + CELL_SIZE);
-        wallGrad.addColorStop(0, level.color);
-        wallGrad.addColorStop(1, level.colorDark);
-        ctx.fillStyle = wallGrad;
-
-        // 画圆角矩形
-        this._roundRect(ctx, x + inset, y + inset, CELL_SIZE - inset * 2, CELL_SIZE - inset * 2, 6);
-        ctx.fill();
-
-        // 顶部高光
-        ctx.fillStyle = 'rgba(255,255,255,0.3)';
-        this._roundRect(ctx, x + inset, y + inset, CELL_SIZE - inset * 2, 4, 3);
-        ctx.fill();
-
-        // 底部阴影
-        ctx.fillStyle = 'rgba(0,0,0,0.08)';
-        ctx.fillRect(x + inset + 2, y + CELL_SIZE - inset - 2, CELL_SIZE - inset * 2 - 4, 2);
+    // 第二遍：垂直条（纵向合并相邻墙格）
+    for (let c = 0; c < this.gridCols; c++) {
+      let start = -1;
+      for (let r = 0; r <= this.gridRows; r++) {
+        const isWall = r < this.gridRows && grid[r][c] === CELL.WALL;
+        if (isWall && start === -1) {
+          start = r;
+        } else if (!isWall && start !== -1) {
+          const x = c * CELL_SIZE + sideGap;
+          const y = start * CELL_SIZE + endGap;
+          const w = thick;
+          const h = (r - start) * CELL_SIZE - endGap * 2;
+          this._drawAcrylicStrip(ctx, x, y, w, h, rx, level.color, level.colorDark);
+          start = -1;
+        }
       }
     }
   }
 
+  _drawAcrylicStrip(ctx, x, y, w, h, r, color, colorDark) {
+    // 主体渐变
+    const grad = ctx.createLinearGradient(x, y, x, y + h);
+    grad.addColorStop(0, color);
+    grad.addColorStop(1, colorDark);
+    ctx.fillStyle = grad;
+    this._roundRect(ctx, x, y, w, h, r);
+    ctx.fill();
+
+    // 顶部高光（亚克力反光）
+    ctx.save();
+    ctx.clip(); // clip to the rounded rect
+    ctx.fillStyle = 'rgba(255,255,255,0.35)';
+    ctx.fillRect(x + r, y, w - r * 2, h * 0.25);
+    ctx.restore();
+
+    // 重新画路径用于后续 clip
+    this._roundRect(ctx, x, y, w, h, r);
+
+    // 底部阴影
+    ctx.save();
+    ctx.clip();
+    ctx.fillStyle = 'rgba(0,0,0,0.08)';
+    ctx.fillRect(x, y + h * 0.85, w, h * 0.15);
+    ctx.restore();
+  }
+
   _roundRect(ctx, x, y, w, h, r) {
+    // 确保 r 不超过宽高的一半
+    r = Math.min(r, w / 2, h / 2);
     ctx.beginPath();
     ctx.moveTo(x + r, y);
     ctx.lineTo(x + w - r, y);
@@ -183,10 +218,12 @@ export default class Renderer {
       f.alpha -= 0.08;
       if (f.alpha <= 0) return false;
 
-      const x = f.col * CELL_SIZE;
-      const y = f.row * CELL_SIZE;
+      const thick = CELL_SIZE * 0.55;
+      const sideGap = (CELL_SIZE - thick) / 2;
+      const x = f.col * CELL_SIZE + sideGap;
+      const y = f.row * CELL_SIZE + sideGap;
       ctx.fillStyle = `rgba(255,255,255,${f.alpha * 0.6})`;
-      this._roundRect(ctx, x + 2, y + 2, CELL_SIZE - 4, CELL_SIZE - 4, 6);
+      this._roundRect(ctx, x, y, thick, thick, 6);
       ctx.fill();
       return true;
     });
