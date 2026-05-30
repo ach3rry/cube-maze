@@ -185,11 +185,16 @@ export default class Game {
   }
 
   _vibrateHit(speed = 0) {
-    if (!navigator.vibrate) return;
-    // 速度越大震动越长：轻擦 10ms，高速撞 50ms
     const intensity = Math.min(speed / this.physics.maxSpeed, 1);
-    const duration = Math.round(8 + intensity * 42);
-    navigator.vibrate(duration);
+    const duration = 80 + Math.round(intensity * 200); // 80ms ~ 280ms
+
+    if (navigator.vibrate) {
+      // Android: 来电式 pattern (震-停-震-停-震)
+      navigator.vibrate([duration, 60, duration, 60, duration]);
+    } else {
+      // iOS: Web Audio 合成嗡嗡声模拟震动感
+      this.audio.playBuzz(intensity);
+    }
   }
 
   _shakeScreen() {

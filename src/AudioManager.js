@@ -133,4 +133,30 @@ export default class AudioManager {
       osc.stop(startTime + 0.8);
     });
   }
+
+  // 震动感嗡嗡声 — iOS 回退，模拟手机震动
+  playBuzz(intensity = 0.5) {
+    if (!this.enabled) return;
+    this._ensure();
+    const ctx = this.ctx;
+    if (!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+
+    osc.type = 'sine';
+    osc.frequency.value = 60;
+
+    const vol = 0.15 + intensity * 0.25;
+    const dur = 0.3 + intensity * 0.4;
+    gain.gain.setValueAtTime(0, ctx.currentTime);
+    gain.gain.linearRampToValueAtTime(vol, ctx.currentTime + 0.03);
+    gain.gain.setValueAtTime(vol, ctx.currentTime + dur * 0.5);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + dur);
+
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + dur);
+  }
 }
