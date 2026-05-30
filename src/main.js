@@ -1,6 +1,7 @@
 import Game from './Game.js';
 
 const game = new Game();
+window.__cubeMazeGame = game;
 
 // 开始按钮
 document.getElementById('btn-start').addEventListener('click', () => {
@@ -9,6 +10,10 @@ document.getElementById('btn-start').addEventListener('click', () => {
 
 // 重新开始按钮
 document.getElementById('btn-restart').addEventListener('click', () => {
+  game.restart();
+});
+
+document.getElementById('btn-restart-ingame').addEventListener('click', () => {
   game.restart();
 });
 
