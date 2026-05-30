@@ -50,9 +50,6 @@ export default class Game {
 
   async startGame() {
     const gyroOk = await this.input.requestGyroPermission();
-    if (gyroOk) {
-      setTimeout(() => this.input.calibrate(), 500);
-    }
 
     this.currentFace = 0;
     this.faceTimes = [];

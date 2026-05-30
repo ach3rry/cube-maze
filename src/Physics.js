@@ -57,6 +57,12 @@ export default class Physics {
       this.vy = (this.vy / speed) * this.maxSpeed;
     }
 
+    // 静态摩擦：输入接近零且速度极小时完全停止（防止平放漂移）
+    if (speed < 0.15 && Math.abs(ax) < 0.02 && Math.abs(ay) < 0.02) {
+      this.vx = 0;
+      this.vy = 0;
+    }
+
     // 更新位置
     this.x += this.vx;
     this.y += this.vy;
