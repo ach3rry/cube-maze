@@ -1,0 +1,436 @@
+/* === Reset & Base === */
+*, *::before, *::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+html, body {
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: #f8f9fa;
+  -webkit-tap-highlight-color: transparent;
+  user-select: none;
+  -webkit-user-select: none;
+}
+
+/* === Screen Management === */
+.screen {
+  position: fixed;
+  inset: 0;
+  display: none;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  z-index: 1;
+}
+
+.screen.active {
+  display: flex;
+}
+
+/* === Start Screen === */
+#start-screen {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  overflow: hidden;
+  position: relative;
+}
+
+.floating-cubes {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  overflow: hidden;
+}
+
+.cube-deco {
+  position: absolute;
+  border: 2px solid;
+  border-radius: 4px;
+  opacity: 0.15;
+  animation: floatCube 8s ease-in-out infinite;
+}
+
+.cube-deco:nth-child(1) {
+  width: 60px; height: 60px;
+  top: 15%; left: 10%;
+  border-color: #FFD93D;
+  transform: rotate(15deg);
+  animation-delay: 0s;
+  animation-duration: 10s;
+}
+
+.cube-deco:nth-child(2) {
+  width: 40px; height: 40px;
+  top: 25%; right: 15%;
+  border-color: #FF6B6B;
+  transform: rotate(-20deg);
+  animation-delay: -2s;
+  animation-duration: 7s;
+}
+
+.cube-deco:nth-child(3) {
+  width: 50px; height: 50px;
+  bottom: 25%; left: 20%;
+  border-color: #51CF66;
+  transform: rotate(30deg);
+  animation-delay: -4s;
+  animation-duration: 9s;
+}
+
+.cube-deco:nth-child(4) {
+  width: 35px; height: 35px;
+  bottom: 20%; right: 20%;
+  border-color: #CC5DE8;
+  transform: rotate(-10deg);
+  animation-delay: -1s;
+  animation-duration: 8s;
+}
+
+.cube-deco:nth-child(5) {
+  width: 45px; height: 45px;
+  top: 60%; left: 60%;
+  border-color: #FF922B;
+  transform: rotate(45deg);
+  animation-delay: -3s;
+  animation-duration: 11s;
+}
+
+.cube-deco:nth-child(6) {
+  width: 30px; height: 30px;
+  top: 10%; right: 35%;
+  border-color: #339AF0;
+  transform: rotate(-35deg);
+  animation-delay: -5s;
+  animation-duration: 6s;
+}
+
+@keyframes floatCube {
+  0%, 100% { opacity: 0.12; transform: translateY(0) rotate(var(--rot, 15deg)); }
+  50% { opacity: 0.25; transform: translateY(-20px) rotate(calc(var(--rot, 15deg) + 10deg)); }
+}
+
+.start-content {
+  text-align: center;
+  padding: 2rem;
+  z-index: 2;
+}
+
+.game-title {
+  font-size: clamp(2.2rem, 8vw, 3.5rem);
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  margin-bottom: 0.3rem;
+  letter-spacing: 0.1em;
+}
+
+.game-subtitle-en {
+  font-size: clamp(0.7rem, 2.5vw, 0.9rem);
+  color: rgba(255,255,255,0.55);
+  letter-spacing: 0.3em;
+  font-weight: 400;
+  margin-bottom: 0.8rem;
+}
+
+.game-tagline {
+  font-size: clamp(0.9rem, 3vw, 1.1rem);
+  color: rgba(255,255,255,0.7);
+  margin-bottom: 2.5rem;
+  font-weight: 300;
+  letter-spacing: 0.2em;
+}
+
+.btn-primary {
+  display: inline-block;
+  padding: 0.9rem 2.8rem;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: #764ba2;
+  background: rgba(255,255,255,0.95);
+  border: none;
+  border-radius: 50px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 8px 30px rgba(0,0,0,0.15);
+  letter-spacing: 0.05em;
+}
+
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 12px 40px rgba(0,0,0,0.25);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+.hint-desktop {
+  margin-top: 1.5rem;
+  font-size: 0.8rem;
+  color: rgba(255,255,255,0.5);
+}
+
+/* === Game Screen === */
+#game-screen {
+  background: #f0f0f5;
+  z-index: 2;
+  justify-content: flex-start;
+}
+
+/* === HUD === */
+#hud {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.5rem 1rem;
+  flex-shrink: 0;
+}
+
+.hud-title-group {
+  display: flex;
+  flex-direction: column;
+}
+
+.hud-title {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #333;
+  letter-spacing: 0.05em;
+}
+
+.hud-subtitle {
+  font-size: 0.6rem;
+  color: rgba(0,0,0,0.3);
+  letter-spacing: 0.2em;
+  font-weight: 400;
+}
+
+.hud-right {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+#timer {
+  font-variant-numeric: tabular-nums;
+  min-width: 4ch;
+  color: #555;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+/* === Level Progress Bar === */
+#level-bar {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0 1rem 0.4rem;
+  flex-shrink: 0;
+}
+
+#level-label {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #888;
+  letter-spacing: 0.1em;
+  white-space: nowrap;
+}
+
+#progress-dots {
+  display: flex;
+  gap: 6px;
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: #ddd;
+  border: 1.5px solid #ccc;
+  transition: all 0.3s ease;
+}
+
+.dot.active {
+  transform: scale(1.3);
+}
+
+.dot.done {
+  border: none;
+}
+
+/* === Canvas === */
+#canvas-wrapper {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+}
+
+#game-canvas {
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+}
+
+/* === Bottom Bar === */
+#bottom-bar {
+  width: 100%;
+  text-align: center;
+  padding: 0.4rem 0 0.6rem;
+  flex-shrink: 0;
+}
+
+.bottom-hint {
+  font-size: 0.7rem;
+  color: #aaa;
+  letter-spacing: 0.1em;
+}
+
+/* === Face Toast === */
+.toast {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  padding: 1rem 2.5rem;
+  border-radius: 16px;
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #333;
+  background: rgba(255,255,255,0.9);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+  z-index: 20;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  pointer-events: none;
+}
+
+.toast.show {
+  opacity: 1;
+}
+
+.toast.hidden {
+  display: none;
+}
+
+/* === Transition Screen (CSS 3D Cube) === */
+#transition-screen {
+  background: #f0f0f5;
+  z-index: 5;
+  perspective: 800px;
+}
+
+#cube-container {
+  width: min(80vw, 400px);
+  height: min(80vw, 400px);
+  perspective: 800px;
+}
+
+#cube {
+  width: 100%;
+  height: 100%;
+  position: relative;
+  transform-style: preserve-3d;
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.cube-face {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 16px;
+  border: 2px solid rgba(0,0,0,0.1);
+  backface-visibility: hidden;
+}
+
+#cube-front  { transform: rotateY(0deg)   translateZ(calc(min(80vw, 400px) / 2)); }
+#cube-back   { transform: rotateY(180deg)  translateZ(calc(min(80vw, 400px) / 2)); }
+#cube-right  { transform: rotateY(90deg)   translateZ(calc(min(80vw, 400px) / 2)); }
+#cube-left   { transform: rotateY(-90deg)  translateZ(calc(min(80vw, 400px) / 2)); }
+#cube-top    { transform: rotateX(90deg)   translateZ(calc(min(80vw, 400px) / 2)); }
+#cube-bottom { transform: rotateX(-90deg)  translateZ(calc(min(80vw, 400px) / 2)); }
+
+/* === Complete Screen === */
+#complete-screen {
+  background: linear-gradient(135deg, #667eea 0%, #764ba2 50%, #f093fb 100%);
+  overflow: hidden;
+}
+
+.complete-content {
+  text-align: center;
+  padding: 2rem;
+  z-index: 2;
+}
+
+.complete-title {
+  font-size: clamp(2rem, 7vw, 3.5rem);
+  font-weight: 800;
+  color: #fff;
+  text-shadow: 0 4px 20px rgba(0,0,0,0.2);
+  margin-bottom: 2rem;
+  letter-spacing: 0.05em;
+}
+
+#complete-stats {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  margin-bottom: 2.5rem;
+  background: rgba(255,255,255,0.2);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border-radius: 16px;
+  padding: 1.5rem 2.5rem;
+}
+
+.stat-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 2rem;
+}
+
+.stat-label {
+  color: rgba(255,255,255,0.85);
+  font-size: 1rem;
+}
+
+.stat-value {
+  color: #fff;
+  font-size: 1.3rem;
+  font-weight: 700;
+  font-variant-numeric: tabular-nums;
+}
+
+/* === Screen Shake (subtle) === */
+@keyframes shake {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(-1px, 1px); }
+  50% { transform: translate(1px, -1px); }
+  75% { transform: translate(-1px, -1px); }
+}
+
+.shake {
+  animation: shake 0.1s ease-in-out;
+}
+
+/* === Responsive (Mobile) === */
+@media (max-width: 600px) {
+  .game-title { font-size: 1.8rem; }
+  .btn-primary { padding: 0.8rem 2rem; font-size: 1rem; }
+  #hud { padding: 0.3rem 0.6rem; }
+  .hud-title { font-size: 0.85rem; }
+  #timer { font-size: 0.8rem; }
+  #level-bar { padding: 0 0.6rem 0.2rem; }
+  #level-label { font-size: 0.65rem; }
+  .dot { width: 6px; height: 6px; }
+  .bottom-hint { font-size: 0.6rem; }
+  #game-canvas { border-radius: 8px; }
+}

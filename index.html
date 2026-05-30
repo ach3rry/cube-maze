@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>正方体迷宫 · Cube Maze</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <!-- 开始界面 -->
+  <div id="start-screen" class="screen active">
+    <div class="floating-cubes">
+      <div class="cube-deco"></div>
+      <div class="cube-deco"></div>
+      <div class="cube-deco"></div>
+      <div class="cube-deco"></div>
+      <div class="cube-deco"></div>
+      <div class="cube-deco"></div>
+    </div>
+    <div class="start-content">
+      <h1 class="game-title">正方体迷宫</h1>
+      <p class="game-subtitle-en">CUBE MAZE</p>
+      <p class="game-tagline">六面挑战 · 无尽乐趣</p>
+      <button id="btn-start" class="btn-primary">开始游戏</button>
+      <p class="hint-desktop">桌面端可用 WASD / 方向键控制</p>
+    </div>
+  </div>
+
+  <!-- 游戏画面 -->
+  <div id="game-screen" class="screen">
+    <!-- HUD -->
+    <div id="hud">
+      <div class="hud-left">
+        <div class="hud-title-group">
+          <span class="hud-title">正方体迷宫</span>
+          <span class="hud-subtitle">CUBE MAZE</span>
+        </div>
+      </div>
+      <div class="hud-right">
+        <span id="timer">00:00</span>
+      </div>
+    </div>
+
+    <!-- 关卡进度 -->
+    <div id="level-bar">
+      <span id="level-label">LEVEL 1</span>
+      <div id="progress-dots">
+        <span class="dot" data-face="0"></span>
+        <span class="dot" data-face="1"></span>
+        <span class="dot" data-face="2"></span>
+        <span class="dot" data-face="3"></span>
+        <span class="dot" data-face="4"></span>
+        <span class="dot" data-face="5"></span>
+      </div>
+    </div>
+
+    <!-- Canvas 容器 -->
+    <div id="canvas-wrapper">
+      <canvas id="game-canvas"></canvas>
+    </div>
+
+    <!-- 底部提示 -->
+    <div id="bottom-bar">
+      <span class="bottom-hint">倾斜手机控制小球</span>
+    </div>
+
+    <!-- 面名提示 -->
+    <div id="face-toast" class="toast hidden">
+      <span id="face-toast-text"></span>
+    </div>
+  </div>
+
+  <!-- 翻转转场 -->
+  <div id="transition-screen" class="screen">
+    <div id="cube-container">
+      <div id="cube">
+        <div class="cube-face" id="cube-front"></div>
+        <div class="cube-face" id="cube-back"></div>
+        <div class="cube-face" id="cube-right"></div>
+        <div class="cube-face" id="cube-left"></div>
+        <div class="cube-face" id="cube-top"></div>
+        <div class="cube-face" id="cube-bottom"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 通关界面 -->
+  <div id="complete-screen" class="screen">
+    <div class="floating-cubes">
+      <div class="cube-deco"></div>
+      <div class="cube-deco"></div>
+      <div class="cube-deco"></div>
+      <div class="cube-deco"></div>
+    </div>
+    <div class="complete-content">
+      <h1 class="complete-title">恭喜通关!</h1>
+      <div id="complete-stats">
+        <div class="stat-item">
+          <span class="stat-label">总用时</span>
+          <span id="total-time" class="stat-value">00:00</span>
+        </div>
+      </div>
+      <button id="btn-restart" class="btn-primary">再来一次</button>
+    </div>
+  </div>
+
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
