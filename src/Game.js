@@ -121,8 +121,9 @@ export default class Game {
       if (this.state === State.PLAYING) {
         // 撞墙反馈（只在首次接触帧触发）
         if (result.hit) {
-          this.audio.playHit();
-          this._vibrateHit();
+          const speed = result.speed || 0;
+          this.audio.playHit(speed);
+          this._vibrateHit(speed);
           this._shakeScreen();
           this.physics.hitWalls.forEach(w => this.renderer.addFlash(w.col, w.row));
         }
@@ -159,7 +160,7 @@ export default class Game {
     this.audio.playFlip();
     this.transition.show();
 
-    await this.transition.playSimple();
+    await this.transition.play(this.currentFace, this.currentFace + 1);
 
     this._loadFace(this.currentFace + 1);
     this._showFaceToast(LEVELS[this.currentFace].name);
@@ -183,10 +184,12 @@ export default class Game {
     this.startGame();
   }
 
-  _vibrateHit() {
-    if (navigator.vibrate) {
-      navigator.vibrate(15);
-    }
+  _vibrateHit(speed = 0) {
+    if (!navigator.vibrate) return;
+    // 速度越大震动越长：轻擦 10ms，高速撞 50ms
+    const intensity = Math.min(speed / this.physics.maxSpeed, 1);
+    const duration = Math.round(8 + intensity * 42);
+    navigator.vibrate(duration);
   }
 
   _shakeScreen() {

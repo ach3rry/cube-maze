@@ -20,27 +20,31 @@ export default class AudioManager {
     }
   }
 
-  // 撞墙音效 — 短促金属撞击
-  playHit() {
+  // 撞墙音效 — 短促金属撞击，音高/音量随速度变化
+  playHit(speed = 3) {
     if (!this.enabled) return;
     this._ensure();
     const ctx = this.ctx;
     if (!ctx) return;
 
+    const intensity = Math.min(speed / 7, 1);
+
     const osc = ctx.createOscillator();
     const gain = ctx.createGain();
 
     osc.type = 'sine';
-    osc.frequency.setValueAtTime(800, ctx.currentTime);
-    osc.frequency.exponentialRampToValueAtTime(200, ctx.currentTime + 0.1);
+    osc.frequency.setValueAtTime(400 + intensity * 600, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(150 + intensity * 100, ctx.currentTime + 0.1);
 
-    gain.gain.setValueAtTime(0.3, ctx.currentTime);
-    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+    const vol = 0.1 + intensity * 0.3;
+    const dur = 0.08 + intensity * 0.15;
+    gain.gain.setValueAtTime(vol, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + dur);
 
     osc.connect(gain);
     gain.connect(ctx.destination);
     osc.start(ctx.currentTime);
-    osc.stop(ctx.currentTime + 0.15);
+    osc.stop(ctx.currentTime + dur);
   }
 
   // 掉入洞口音效 — 下滑音调
