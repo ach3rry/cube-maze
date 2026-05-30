@@ -51,14 +51,20 @@ export default class InputManager {
     this._onDeviceOrientation = (e) => {
       if (e.gamma === null || e.beta === null) return;
 
-      // gamma: 左右倾斜 (-90 ~ 90)
-      // beta: 前后倾斜 (-180 ~ 180)
-      let gx = (e.gamma - this.calibrationGamma) / 30;
-      let gy = (e.beta - this.calibrationBeta - 20) / 30; // 减20度补偿自然持握角度
+      // 重力向量投影 — 将陀螺仪角度映射到屏幕平面
+      // 手机平放 (beta≈0, gamma≈0) → gx≈0, gy≈0 (球不动)
+      // 右侧抬起 (gamma>0) → gx>0 (球向右滚)
+      // 顶部前倾 (beta>0) → gy>0 (球向下滚)
+      const betaRad = (e.beta - this.calibrationBeta) * Math.PI / 180;
+      const gammaRad = (e.gamma - this.calibrationGamma) * Math.PI / 180;
 
-      // 限幅
-      gx = Math.max(-1, Math.min(1, gx));
-      gy = Math.max(-1, Math.min(1, gy));
+      let gx = Math.sin(gammaRad) * Math.cos(betaRad);
+      let gy = Math.sin(betaRad);
+
+      // 死区：过滤陀螺仪噪声（手机平放不漂移）
+      const DEAD_ZONE = 0.06;
+      if (Math.abs(gx) < DEAD_ZONE) gx = 0;
+      if (Math.abs(gy) < DEAD_ZONE) gy = 0;
 
       this.gx = gx * this.sensitivity;
       this.gy = gy * this.sensitivity;

@@ -121,8 +121,9 @@ export default class Game {
       if (this.state === State.PLAYING) {
         // 撞墙反馈（只在首次接触帧触发）
         if (result.hit) {
-          this.audio.playHit();
-          this._vibrateHit();
+          const speed = result.speed || 0;
+          this.audio.playHit(speed);
+          this._vibrateHit(speed);
           this._shakeScreen();
           this.physics.hitWalls.forEach(w => this.renderer.addFlash(w.col, w.row));
         }
@@ -159,7 +160,7 @@ export default class Game {
     this.audio.playFlip();
     this.transition.show();
 
-    await this.transition.playSimple();
+    await this.transition.play(this.currentFace, this.currentFace + 1);
 
     this._loadFace(this.currentFace + 1);
     this._showFaceToast(LEVELS[this.currentFace].name);
@@ -183,9 +184,16 @@ export default class Game {
     this.startGame();
   }
 
-  _vibrateHit() {
+  _vibrateHit(speed = 0) {
+    const intensity = Math.min(speed / this.physics.maxSpeed, 1);
+    const duration = 200 + Math.round(intensity * 400); // 200ms ~ 600ms
+
     if (navigator.vibrate) {
-      navigator.vibrate(15);
+      // Android: 来电式强震 pattern (震-停-震-停-震)
+      navigator.vibrate([duration, 80, duration, 80, duration]);
+    } else {
+      // iOS: Web Audio 合成嗡嗡声模拟震动感
+      this.audio.playBuzz(intensity);
     }
   }
 
