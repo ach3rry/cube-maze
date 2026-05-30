@@ -17,6 +17,7 @@ const State = {
 
 const CHASE_SPAWN_DISTANCE = CELL_SIZE * 2;
 const CHASE_SPEED = 58;
+const FAILURE_RESET_FACE = 1;
 
 export default class Game {
   constructor() {
@@ -61,11 +62,13 @@ export default class Game {
   }
 
   start() {
-    this.audio.init();
     this._showScreen('start');
   }
 
   async startGame() {
+    this.audio.unlock().then((unlocked) => {
+      if (unlocked) this.audio.playReady();
+    });
     await this.input.requestGyroPermission();
     this.currentFace = 0;
     this.faceTimes = [];
@@ -114,8 +117,8 @@ export default class Game {
       this.deathTimer -= dt;
       this._renderFrame();
       if (this.deathTimer <= 0) {
-        this._loadFace(this.currentFace);
-        this._showFaceToast('陷阱吞噬 · 本关重置', 'TRY AGAIN', 'danger');
+        this._loadFace(FAILURE_RESET_FACE);
+        this._showFaceToast('陷阱吞噬 · 返回第 1 关', 'TRY AGAIN', 'danger');
         this.state = State.PLAYING;
       }
       this._animFrame = requestAnimationFrame(this._boundLoop);
@@ -430,12 +433,21 @@ export default class Game {
 
   _vibrateHit(speed = 0) {
     const intensity = Math.min(speed / this.physics.maxSpeed, 1);
-    if (navigator.vibrate) navigator.vibrate(30 + Math.round(intensity * 90));
-    else this.audio.playBuzz(intensity);
+    const pattern = 30 + Math.round(intensity * 90);
+    if (!this._tryVibrate(pattern)) this.audio.playBuzz(Math.max(0.25, intensity), 0.65);
   }
 
   _vibrateDeath() {
-    if (navigator.vibrate) navigator.vibrate([70, 45, 150]);
+    if (!this._tryVibrate([70, 45, 150])) this.audio.playBuzz(1, 1.25);
+  }
+
+  _tryVibrate(pattern) {
+    if (typeof navigator.vibrate !== 'function') return false;
+    try {
+      return navigator.vibrate(pattern) !== false;
+    } catch {
+      return false;
+    }
   }
 
   _shakeScreen() {
