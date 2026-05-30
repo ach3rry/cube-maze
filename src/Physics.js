@@ -18,7 +18,7 @@ export default class Physics {
 
     // 碰撞反馈
     this.hitWalls = [];
-    this.wasTouchingWall = false; // 上一帧是否接触墙壁
+    this._prevWallKeys = new Set(); // 上一帧接触的墙壁格子集合
 
     // 掉洞动画
     this.falling = false;
@@ -32,7 +32,7 @@ export default class Physics {
     this.vy = 0;
     this.falling = false;
     this.fallProgress = 0;
-    this.wasTouchingWall = false;
+    this._prevWallKeys = new Set();
     this.hitWalls = [];
   }
 
@@ -143,12 +143,16 @@ export default class Physics {
       }
     }
 
-    // 只在"上一帧未接触 且 这一帧接触"时算撞击
-    if (touching && !this.wasTouchingWall) {
-      impacted = true;
+    // 按墙壁格子判断新撞击：此帧有新的墙壁格子被碰到就算撞击
+    // 修复：球碰到底壁后再碰侧壁也能触发反馈
+    if (touching) {
+      const currentKeys = this.hitWalls.map(w => `${w.col},${w.row}`);
+      impacted = currentKeys.some(key => !this._prevWallKeys.has(key));
+      this._prevWallKeys = new Set(currentKeys);
+    } else {
+      impacted = false;
+      this._prevWallKeys = new Set();
     }
-
-    this.wasTouchingWall = touching;
 
     return { touching, impacted };
   }

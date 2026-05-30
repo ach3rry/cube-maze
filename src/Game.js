@@ -186,11 +186,11 @@ export default class Game {
 
   _vibrateHit(speed = 0) {
     const intensity = Math.min(speed / this.physics.maxSpeed, 1);
-    const duration = 80 + Math.round(intensity * 200); // 80ms ~ 280ms
+    const duration = 200 + Math.round(intensity * 400); // 200ms ~ 600ms
 
     if (navigator.vibrate) {
-      // Android: 来电式 pattern (震-停-震-停-震)
-      navigator.vibrate([duration, 60, duration, 60, duration]);
+      // Android: 来电式强震 pattern (震-停-震-停-震)
+      navigator.vibrate([duration, 80, duration, 80, duration]);
     } else {
       // iOS: Web Audio 合成嗡嗡声模拟震动感
       this.audio.playBuzz(intensity);
