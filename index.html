@@ -9,6 +9,7 @@
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
+  <div id="error-msg" style="display:none;position:fixed;top:0;left:0;right:0;background:#e74c3c;color:#fff;padding:1rem;z-index:9999;text-align:center;font-size:14px;"></div>
   <!-- 开始界面 -->
   <div id="start-screen" class="screen active">
     <div class="floating-cubes">
@@ -22,7 +23,7 @@
     <div class="start-content">
       <h1 class="game-title">正方体迷宫</h1>
       <p class="game-subtitle-en">CUBE MAZE</p>
-      <p class="game-tagline">六面挑战 · 无尽乐趣</p>
+      <p class="game-tagline">五关挑战 · 无尽乐趣</p>
       <button id="btn-start" class="btn-primary">开始游戏</button>
       <p class="hint-desktop">桌面端可用 WASD / 方向键控制</p>
     </div>
@@ -39,6 +40,7 @@
         </div>
       </div>
       <div class="hud-right">
+        <span id="star-counter">★ 0/0</span>
         <span id="timer">00:00</span>
       </div>
     </div>
@@ -52,7 +54,6 @@
         <span class="dot" data-face="2"></span>
         <span class="dot" data-face="3"></span>
         <span class="dot" data-face="4"></span>
-        <span class="dot" data-face="5"></span>
       </div>
     </div>
 

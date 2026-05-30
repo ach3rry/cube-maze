@@ -33,16 +33,20 @@ export default class Renderer {
     this.scale = scale;
   }
 
-  draw(levelIndex, ball, gravityX, gravityY) {
+  draw(levelIndex, ball, gravityX, gravityY, goalUnlocked = true, movingTraps = [], grid = null) {
     const level = LEVELS[levelIndex];
     const ctx = this.ctx;
+    const g = grid || level.grid;
 
     ctx.clearRect(0, 0, this.mazeWidth, this.mazeHeight);
 
     this.drawBackground(level);
-    this.drawFloor(level);
-    this.drawGoal(level);
-    this.drawWalls(level);
+    this.drawFloor(level, g);
+    this.drawTraps(level, g);
+    this.drawStars(level, g);
+    this.drawMovingTraps(movingTraps);
+    this.drawGoal(level, goalUnlocked, g);
+    this.drawWalls(level, g);
     this.drawFlash();
     this.drawBall(ball, level);
     this.drawGravityIndicator(gravityX, gravityY);
@@ -59,9 +63,8 @@ export default class Renderer {
     ctx.fillRect(0, 0, this.mazeWidth, this.mazeHeight);
   }
 
-  drawFloor(level) {
+  drawFloor(level, grid) {
     const ctx = this.ctx;
-    const grid = level.grid;
 
     for (let r = 0; r < this.gridRows; r++) {
       for (let c = 0; c < this.gridCols; c++) {
@@ -80,9 +83,8 @@ export default class Renderer {
     }
   }
 
-  drawWalls(level) {
+  drawWalls(level, grid) {
     const ctx = this.ctx;
-    const grid = level.grid;
 
     for (let r = 0; r < this.gridRows; r++) {
       for (let c = 0; c < this.gridCols; c++) {
@@ -128,9 +130,8 @@ export default class Renderer {
     ctx.closePath();
   }
 
-  drawGoal(level) {
+  drawGoal(level, goalUnlocked = true, grid) {
     const ctx = this.ctx;
-    const grid = level.grid;
 
     for (let r = 0; r < this.gridRows; r++) {
       for (let c = 0; c < this.gridCols; c++) {
@@ -140,36 +141,223 @@ export default class Renderer {
         const cy = r * CELL_SIZE + CELL_SIZE / 2;
         const radius = CELL_SIZE * 0.35;
 
-        // 外圈发光
-        const glowGrad = ctx.createRadialGradient(cx, cy, radius * 0.5, cx, cy, CELL_SIZE * 0.8);
-        glowGrad.addColorStop(0, level.color + '50');
+        if (goalUnlocked) {
+          // 外圈发光
+          const glowGrad = ctx.createRadialGradient(cx, cy, radius * 0.5, cx, cy, CELL_SIZE * 0.8);
+          glowGrad.addColorStop(0, level.color + '50');
+          glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = glowGrad;
+          ctx.beginPath();
+          ctx.arc(cx, cy, CELL_SIZE * 0.8, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 洞口
+          ctx.fillStyle = 'rgba(0,0,0,0.5)';
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 彩色边框
+          ctx.strokeStyle = level.color;
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // 呼吸脉冲
+          const time = Date.now() / 1000;
+          const pulse = 0.5 + Math.sin(time * 3) * 0.3;
+          ctx.fillStyle = level.color + Math.round(pulse * 120).toString(16).padStart(2, '0');
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius * 0.4, 0, Math.PI * 2);
+          ctx.fill();
+        } else {
+          // 锁定状态：灰色暗淡
+          const glowGrad = ctx.createRadialGradient(cx, cy, radius * 0.5, cx, cy, CELL_SIZE * 0.8);
+          glowGrad.addColorStop(0, 'rgba(100,100,100,0.3)');
+          glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+          ctx.fillStyle = glowGrad;
+          ctx.beginPath();
+          ctx.arc(cx, cy, CELL_SIZE * 0.8, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.fillStyle = 'rgba(50,50,50,0.5)';
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+          ctx.fill();
+
+          ctx.strokeStyle = '#666';
+          ctx.lineWidth = 2.5;
+          ctx.beginPath();
+          ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // 锁图标（简化为十字叉）
+          ctx.strokeStyle = '#999';
+          ctx.lineWidth = 2;
+          ctx.beginPath();
+          ctx.moveTo(cx - 5, cy - 5);
+          ctx.lineTo(cx + 5, cy + 5);
+          ctx.moveTo(cx + 5, cy - 5);
+          ctx.lineTo(cx - 5, cy + 5);
+          ctx.stroke();
+        }
+      }
+    }
+  }
+
+  drawTraps(level, grid) {
+    const ctx = this.ctx;
+
+    for (let r = 0; r < this.gridRows; r++) {
+      for (let c = 0; c < this.gridCols; c++) {
+        if (grid[r][c] !== CELL.TRAP) continue;
+
+        const cx = c * CELL_SIZE + CELL_SIZE / 2;
+        const cy = r * CELL_SIZE + CELL_SIZE / 2;
+        const radius = CELL_SIZE * 0.33;
+
+        // 红色外圈发光
+        const glowGrad = ctx.createRadialGradient(cx, cy, radius * 0.5, cx, cy, CELL_SIZE * 0.7);
+        glowGrad.addColorStop(0, 'rgba(220,40,40,0.5)');
         glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
         ctx.fillStyle = glowGrad;
         ctx.beginPath();
-        ctx.arc(cx, cy, CELL_SIZE * 0.8, 0, Math.PI * 2);
+        ctx.arc(cx, cy, CELL_SIZE * 0.7, 0, Math.PI * 2);
         ctx.fill();
 
-        // 洞口
-        ctx.fillStyle = 'rgba(0,0,0,0.5)';
+        // 暗红洞口
+        ctx.fillStyle = 'rgba(60,5,5,0.7)';
         ctx.beginPath();
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
         ctx.fill();
 
-        // 彩色边框
-        ctx.strokeStyle = level.color;
+        // 红色边框
+        ctx.strokeStyle = '#CC3333';
         ctx.lineWidth = 2.5;
         ctx.beginPath();
         ctx.arc(cx, cy, radius, 0, Math.PI * 2);
         ctx.stroke();
 
-        // 呼吸脉冲
+        // 快速脉冲
         const time = Date.now() / 1000;
-        const pulse = 0.5 + Math.sin(time * 3) * 0.3;
-        ctx.fillStyle = level.color + Math.round(pulse * 120).toString(16).padStart(2, '0');
+        const pulse = 0.4 + Math.sin(time * 5) * 0.35;
+        ctx.fillStyle = `rgba(255,50,50,${pulse * 0.6})`;
         ctx.beginPath();
-        ctx.arc(cx, cy, radius * 0.4, 0, Math.PI * 2);
+        ctx.arc(cx, cy, radius * 0.35, 0, Math.PI * 2);
         ctx.fill();
       }
+    }
+  }
+
+  drawStars(level, grid) {
+    const ctx = this.ctx;
+
+    for (let r = 0; r < this.gridRows; r++) {
+      for (let c = 0; c < this.gridCols; c++) {
+        if (grid[r][c] !== CELL.STAR) continue;
+
+        const cx = c * CELL_SIZE + CELL_SIZE / 2;
+        const cy = r * CELL_SIZE + CELL_SIZE / 2;
+        const outerR = CELL_SIZE * 0.28;
+        const innerR = outerR * 0.4;
+        const time = Date.now() / 1000;
+
+        // 光晕
+        const glowGrad = ctx.createRadialGradient(cx, cy, innerR, cx, cy, outerR * 1.8);
+        glowGrad.addColorStop(0, 'rgba(255,215,0,0.4)');
+        glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+        ctx.fillStyle = glowGrad;
+        ctx.beginPath();
+        ctx.arc(cx, cy, outerR * 1.8, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 旋转五角星
+        const rotation = time * 0.5;
+        ctx.fillStyle = '#FFD700';
+        ctx.strokeStyle = '#DAA520';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        for (let i = 0; i < 5; i++) {
+          const angle = rotation + (i * Math.PI * 2) / 5 - Math.PI / 2;
+          const ix = cx + Math.cos(angle) * outerR;
+          const iy = cy + Math.sin(angle) * outerR;
+          if (i === 0) ctx.moveTo(ix, iy);
+          else ctx.lineTo(ix, iy);
+
+          const innerAngle = angle + Math.PI / 5;
+          const innerX = cx + Math.cos(innerAngle) * innerR;
+          const innerY = cy + Math.sin(innerAngle) * innerR;
+          ctx.lineTo(innerX, innerY);
+        }
+        ctx.closePath();
+        ctx.fill();
+        ctx.stroke();
+
+        // 中心亮光
+        ctx.fillStyle = 'rgba(255,255,200,0.9)';
+        ctx.beginPath();
+        ctx.arc(cx, cy, innerR * 0.6, 0, Math.PI * 2);
+        ctx.fill();
+      }
+    }
+  }
+
+  drawMovingTraps(movingTraps) {
+    const ctx = this.ctx;
+    const radius = 16;
+
+    for (const mt of movingTraps) {
+      if (!mt.active) continue;
+
+      const cx = mt.x;
+      const cy = mt.y;
+
+      // 分裂闪光 — 扩散白环
+      if (mt.spawnFlash !== undefined && mt.spawnFlash > 0) {
+        const flashRadius = radius * (1 + (1 - mt.spawnFlash) * 2.5);
+        const flashAlpha = mt.spawnFlash * 0.8;
+        ctx.strokeStyle = `rgba(255,255,255,${flashAlpha})`;
+        ctx.lineWidth = 3 * mt.spawnFlash + 1;
+        ctx.beginPath();
+        ctx.arc(cx, cy, flashRadius, 0, Math.PI * 2);
+        ctx.stroke();
+
+        ctx.fillStyle = `rgba(255,255,255,${flashAlpha * 0.4})`;
+        ctx.beginPath();
+        ctx.arc(cx, cy, radius * 2.2 * (1 + (1 - mt.spawnFlash)), 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // 青色外圈发光
+      const glowGrad = ctx.createRadialGradient(cx, cy, radius * 0.5, cx, cy, radius * 2.2);
+      glowGrad.addColorStop(0, 'rgba(0,200,180,0.55)');
+      glowGrad.addColorStop(1, 'rgba(0,0,0,0)');
+      ctx.fillStyle = glowGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius * 2.2, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 深青洞口
+      ctx.fillStyle = 'rgba(0,60,55,0.75)';
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.fill();
+
+      // 青色边框
+      ctx.strokeStyle = '#00BFA5';
+      ctx.lineWidth = 3;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // 快速脉冲
+      const time = Date.now() / 1000;
+      const pulse = 0.4 + Math.sin(time * 6) * 0.4;
+      ctx.fillStyle = `rgba(100,255,240,${pulse * 0.7})`;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius * 0.4, 0, Math.PI * 2);
+      ctx.fill();
     }
   }
 

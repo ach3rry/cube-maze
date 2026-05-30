@@ -215,6 +215,18 @@ html, body {
   gap: 0.8rem;
 }
 
+#star-counter {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: #DAA520;
+  transition: color 0.3s ease;
+}
+
+#star-counter.unlocked {
+  color: #FFD700;
+  text-shadow: 0 0 8px rgba(255,215,0,0.4);
+}
+
 #timer {
   font-variant-numeric: tabular-nums;
   min-width: 4ch;
@@ -427,6 +439,7 @@ html, body {
   .btn-primary { padding: 0.8rem 2rem; font-size: 1rem; }
   #hud { padding: 0.3rem 0.6rem; }
   .hud-title { font-size: 0.85rem; }
+  #star-counter { font-size: 0.75rem; }
   #timer { font-size: 0.8rem; }
   #level-bar { padding: 0 0.6rem 0.2rem; }
   #level-label { font-size: 0.65rem; }

@@ -26,7 +26,8 @@ export default class Transition {
 
     // 初始化面样式
     this.faces.forEach((face, i) => {
-      face.style.background = LEVELS[i].bg;
+      const level = LEVELS[i % LEVELS.length];
+      face.style.background = level.bg;
       face.style.display = 'flex';
       face.style.alignItems = 'center';
       face.style.justifyContent = 'center';

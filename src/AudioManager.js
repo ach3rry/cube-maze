@@ -129,4 +129,84 @@ export default class AudioManager {
       osc.stop(startTime + 0.8);
     });
   }
+
+  // 陷阱死亡音效 — 刺耳下降音 + 噪声爆裂
+  playTrapDeath() {
+    if (!this.enabled) return;
+    this._ensure();
+    const ctx = this.ctx;
+    if (!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sawtooth';
+    osc.frequency.setValueAtTime(300, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(50, ctx.currentTime + 0.3);
+    gain.gain.setValueAtTime(0.3, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.35);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.35);
+
+    const bufferSize = ctx.sampleRate * 0.15;
+    const buffer = ctx.createBuffer(1, bufferSize, ctx.sampleRate);
+    const data = buffer.getChannelData(0);
+    for (let i = 0; i < bufferSize; i++) {
+      data[i] = (Math.random() * 2 - 1) * Math.max(0, 1 - i / bufferSize);
+    }
+    const noise = ctx.createBufferSource();
+    noise.buffer = buffer;
+    const noiseGain = ctx.createGain();
+    noiseGain.gain.setValueAtTime(0.25, ctx.currentTime);
+    noiseGain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+    noise.connect(noiseGain);
+    noiseGain.connect(ctx.destination);
+    noise.start(ctx.currentTime);
+    noise.stop(ctx.currentTime + 0.15);
+  }
+
+  // 收集星星音效 — 清脆上升"叮"
+  playStarCollect() {
+    if (!this.enabled) return;
+    this._ensure();
+    const ctx = this.ctx;
+    if (!ctx) return;
+
+    const osc = ctx.createOscillator();
+    const gain = ctx.createGain();
+    osc.type = 'sine';
+    osc.frequency.setValueAtTime(880, ctx.currentTime);
+    osc.frequency.exponentialRampToValueAtTime(1320, ctx.currentTime + 0.1);
+    gain.gain.setValueAtTime(0.25, ctx.currentTime);
+    gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.2);
+    osc.connect(gain);
+    gain.connect(ctx.destination);
+    osc.start(ctx.currentTime);
+    osc.stop(ctx.currentTime + 0.2);
+  }
+
+  // 终点解锁音效 — 上行琶音
+  playGoalUnlock() {
+    if (!this.enabled) return;
+    this._ensure();
+    const ctx = this.ctx;
+    if (!ctx) return;
+
+    const notes = [523, 659, 784];
+    notes.forEach((freq, i) => {
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.type = 'sine';
+      osc.frequency.value = freq;
+      const startTime = ctx.currentTime + i * 0.1;
+      gain.gain.setValueAtTime(0, startTime);
+      gain.gain.linearRampToValueAtTime(0.2, startTime + 0.03);
+      gain.gain.exponentialRampToValueAtTime(0.01, startTime + 0.5);
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.start(startTime);
+      osc.stop(startTime + 0.5);
+    });
+  }
 }

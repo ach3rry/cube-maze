@@ -11,10 +11,10 @@ export default class Physics {
     this.radius = 12;
 
     // 物理参数
-    this.accelScale = 0.4;
+    this.accelScale = 0.55;
     this.friction = 0.97;
-    this.maxSpeed = 7;
-    this.bounceCoeff = 0.35;
+    this.maxSpeed = 8.5;
+    this.bounceCoeff = 0.45;
 
     // 碰撞反馈
     this.hitWalls = [];
@@ -36,7 +36,7 @@ export default class Physics {
     this.hitWalls = [];
   }
 
-  update(ax, ay, grid) {
+  update(ax, ay, grid, movingTraps = [], goalUnlocked = true) {
     if (this.falling) {
       this.fallProgress += 0.04;
       return { falling: true, complete: this.fallProgress >= 1 };
@@ -73,10 +73,15 @@ export default class Physics {
 
     const hit = impacted; // 只在"从未接触 → 接触"的那一帧为 true
 
-    // 检查是否到达终点
-    const goalReached = this.checkGoal(grid);
+    // 检查是否到达终点（仅在解锁后触发，防止未解锁时球卡在缩小动画）
+    const goalReached = goalUnlocked ? this.checkGoal(grid) : false;
 
-    return { hit, goalReached };
+    // 检查陷阱 / 星星 / 移动陷阱
+    const hitTrap = this.checkTrap(grid);
+    const collectedStar = this.checkStars(grid);
+    const hitMovingTrap = this.checkMovingTraps(movingTraps);
+
+    return { hit, goalReached, hitTrap, collectedStar, hitMovingTrap };
   }
 
   resolveCollisions(grid) {
@@ -173,6 +178,65 @@ export default class Physics {
           this.goalY = goalY;
           return true;
         }
+      }
+    }
+    return false;
+  }
+
+  checkTrap(grid) {
+    const rows = grid.length;
+    const cols = grid[0].length;
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (grid[r][c] !== CELL.TRAP) continue;
+
+        const trapX = c * CELL_SIZE + CELL_SIZE / 2;
+        const trapY = r * CELL_SIZE + CELL_SIZE / 2;
+        const dx = this.x - trapX;
+        const dy = this.y - trapY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < this.radius * 0.8) {
+          return true;
+        }
+      }
+    }
+    return false;
+  }
+
+  checkStars(grid) {
+    const rows = grid.length;
+    const cols = grid[0].length;
+
+    for (let r = 0; r < rows; r++) {
+      for (let c = 0; c < cols; c++) {
+        if (grid[r][c] !== CELL.STAR) continue;
+
+        const starX = c * CELL_SIZE + CELL_SIZE / 2;
+        const starY = r * CELL_SIZE + CELL_SIZE / 2;
+        const dx = this.x - starX;
+        const dy = this.y - starY;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+
+        if (dist < this.radius * 1.0) {
+          return { col: c, row: r };
+        }
+      }
+    }
+    return null;
+  }
+
+  checkMovingTraps(movingTraps) {
+    const trapRadius = 14;
+    for (let i = 0; i < movingTraps.length; i++) {
+      const mt = movingTraps[i];
+      if (!mt.active) continue;
+      const dx = this.x - mt.x;
+      const dy = this.y - mt.y;
+      const dist = Math.sqrt(dx * dx + dy * dy);
+      if (dist < this.radius + trapRadius) {
+        return true;
       }
     }
     return false;

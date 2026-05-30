@@ -5,7 +5,7 @@ export default class InputManager {
 
     this.keys = {};
     this.hasGyro = false;
-    this.sensitivity = 1.3;
+    this.sensitivity = 1.1;
 
     // 陀螺仪校准基准
     this.calibrationBeta = 0;
@@ -48,8 +48,12 @@ export default class InputManager {
 
   _startGyro() {
     this.hasGyro = true;
+    this.gyroActive = false;
     this._onDeviceOrientation = (e) => {
       if (e.gamma === null || e.beta === null) return;
+
+      // 收到真实陀螺仪数据，标记为活跃
+      this.gyroActive = true;
 
       // 固定水平面为参考 — 手机物理平放球就不动
       // 右侧抬起 (gamma>0) → gx>0 (球向右滚)
@@ -83,7 +87,7 @@ export default class InputManager {
   }
 
   update() {
-    if (this.hasGyro) return; // 陀螺仪优先
+    if (this.hasGyro && this.gyroActive) return; // 陀螺仪优先，但仅在收到真实数据时
 
     // 键盘输入
     let kx = 0, ky = 0;
