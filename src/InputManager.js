@@ -5,7 +5,7 @@ export default class InputManager {
 
     this.keys = {};
     this.hasGyro = false;
-    this.sensitivity = 1.3;
+    this.sensitivity = 1.1;
 
     // 陀螺仪校准基准
     this.calibrationBeta = 0;
@@ -48,15 +48,18 @@ export default class InputManager {
 
   _startGyro() {
     this.hasGyro = true;
+    if (this._onDeviceOrientation) return;
+    this.gyroActive = false;
     this._onDeviceOrientation = (e) => {
       if (e.gamma === null || e.beta === null) return;
 
-      // 重力向量投影 — 将陀螺仪角度映射到屏幕平面
-      // 手机平放 (beta≈0, gamma≈0) → gx≈0, gy≈0 (球不动)
+      this.gyroActive = true;
+
+      // Use the physical horizontal plane as the neutral position.
       // 右侧抬起 (gamma>0) → gx>0 (球向右滚)
       // 顶部前倾 (beta>0) → gy>0 (球向下滚)
-      const betaRad = (e.beta - this.calibrationBeta) * Math.PI / 180;
-      const gammaRad = (e.gamma - this.calibrationGamma) * Math.PI / 180;
+      const betaRad = e.beta * Math.PI / 180;
+      const gammaRad = e.gamma * Math.PI / 180;
 
       let gx = Math.sin(gammaRad) * Math.cos(betaRad);
       let gy = Math.sin(betaRad);
@@ -84,7 +87,7 @@ export default class InputManager {
   }
 
   update() {
-    if (this.hasGyro) return; // 陀螺仪优先
+    if (this.hasGyro && this.gyroActive) return;
 
     // 键盘输入
     let kx = 0, ky = 0;

@@ -5,75 +5,137 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
   <meta name="apple-mobile-web-app-capable" content="yes">
   <meta name="mobile-web-app-capable" content="yes">
-  <title>正方体迷宫 · Cube Maze</title>
+  <title>腕有引力 · WRISTBOUND</title>
+  <link rel="icon" href="data:,">
   <link rel="stylesheet" href="style.css">
 </head>
 <body>
-  <!-- 开始界面 -->
   <div id="start-screen" class="screen active">
-    <div class="floating-cubes">
-      <div class="cube-deco"></div>
-      <div class="cube-deco"></div>
-      <div class="cube-deco"></div>
-      <div class="cube-deco"></div>
-      <div class="cube-deco"></div>
-      <div class="cube-deco"></div>
+    <div class="ambient-glow ambient-glow-a"></div>
+    <div class="ambient-glow ambient-glow-b"></div>
+    <div class="floating-cubes" aria-hidden="true">
+      <div class="cube-deco cube-pink"></div>
+      <div class="cube-deco cube-yellow"></div>
+      <div class="cube-deco cube-cyan"></div>
+      <div class="cube-deco cube-green"></div>
+      <div class="cube-deco cube-purple"></div>
+      <div class="cube-deco cube-orange"></div>
     </div>
+
     <div class="start-content">
-      <h1 class="game-title">正方体迷宫</h1>
-      <p class="game-subtitle-en">CUBE MAZE</p>
-      <p class="game-tagline">六面挑战 · 无尽乐趣</p>
-      <button id="btn-start" class="btn-primary">开始游戏</button>
-      <p class="hint-desktop">桌面端可用 WASD / 方向键控制</p>
+      <div class="start-copy">
+        <p class="eyebrow">GYROSCOPE PUZZLE · 六面体感挑战</p>
+        <h1 class="game-title"><span>腕有</span><span>引力</span></h1>
+        <p class="game-subtitle-en"><i></i>WRISTBOUND<i></i></p>
+        <p class="game-tagline">倾斜手机，让金属小球穿过六面亚克力迷宫。</p>
+        <div class="start-actions">
+          <button id="btn-start" class="btn-primary">
+            <span>开始挑战</span>
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m9 18 6-6-6-6"/></svg>
+          </button>
+          <p class="hint-desktop">桌面端可用 WASD / 方向键控制</p>
+        </div>
+      </div>
+
+      <div class="start-visual" aria-hidden="true">
+        <div class="hero-cube-shadow"></div>
+        <div class="hero-cube">
+          <div class="hero-cube-face hero-cube-front">
+            <span class="maze-line maze-line-1"></span>
+            <span class="maze-line maze-line-2"></span>
+            <span class="maze-line maze-line-3"></span>
+            <span class="maze-line maze-line-4"></span>
+            <span class="hero-ball"></span>
+            <span class="hero-hole"></span>
+          </div>
+          <div class="hero-cube-face hero-cube-right"></div>
+          <div class="hero-cube-face hero-cube-top"></div>
+        </div>
+        <p class="visual-caption"><strong>01</strong><span>ROLL · TILT · FLIP</span></p>
+      </div>
+    </div>
+
+    <div class="start-footer">
+      <span>6 个立方体平面</span>
+      <span>陀螺仪实时控制</span>
+      <span>金属碰撞反馈</span>
     </div>
   </div>
 
-  <!-- 游戏画面 -->
   <div id="game-screen" class="screen">
-    <!-- HUD -->
+    <div class="game-ambient game-ambient-a"></div>
+    <div class="game-ambient game-ambient-b"></div>
+
     <div id="hud">
       <div class="hud-left">
+        <div class="brand-cube" aria-hidden="true">
+          <span></span><span></span><span></span>
+        </div>
         <div class="hud-title-group">
-          <span class="hud-title">正方体迷宫</span>
-          <span class="hud-subtitle">CUBE MAZE</span>
+          <span class="hud-title">腕有引力</span>
+          <span class="hud-subtitle">WRISTBOUND</span>
         </div>
       </div>
       <div class="hud-right">
-        <span id="timer">00:00</span>
+        <div id="star-counter" class="star-counter hidden">★ 0/0</div>
+        <div class="timer-capsule">
+          <svg class="timer-icon" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span id="timer">00:00</span>
+        </div>
+        <button id="btn-restart-ingame" class="hud-btn" title="重新开始">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+        </button>
       </div>
     </div>
 
-    <!-- 关卡进度 -->
     <div id="level-bar">
-      <span id="level-label">LEVEL 1</span>
-      <div id="progress-dots">
-        <span class="dot" data-face="0"></span>
-        <span class="dot" data-face="1"></span>
-        <span class="dot" data-face="2"></span>
-        <span class="dot" data-face="3"></span>
-        <span class="dot" data-face="4"></span>
-        <span class="dot" data-face="5"></span>
+      <div class="level-copy">
+        <span id="level-label">LEVEL 01</span>
+        <span id="face-name">第 1 面 · 启程</span>
+      </div>
+      <div class="progress-track">
+        <div id="progress-dots">
+          <span class="dot" data-face="0"></span>
+          <span class="dot" data-face="1"></span>
+          <span class="dot" data-face="2"></span>
+          <span class="dot" data-face="3"></span>
+          <span class="dot" data-face="4"></span>
+          <span class="dot" data-face="5"></span>
+        </div>
+        <span class="cube-finish" aria-label="六面终点">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="m12 3 8 4.5v9L12 21l-8-4.5v-9L12 3Z"/><path d="m4 7.5 8 4.5 8-4.5M12 12v9"/></svg>
+        </span>
       </div>
     </div>
 
-    <!-- Canvas 容器 -->
     <div id="canvas-wrapper">
-      <canvas id="game-canvas"></canvas>
+      <div id="maze-shell">
+        <span class="shell-corner shell-corner-tl"></span>
+        <span class="shell-corner shell-corner-tr"></span>
+        <span class="shell-corner shell-corner-bl"></span>
+        <span class="shell-corner shell-corner-br"></span>
+        <canvas id="game-canvas"></canvas>
+      </div>
     </div>
 
-    <!-- 底部提示 -->
     <div id="bottom-bar">
-      <span class="bottom-hint">倾斜手机控制小球</span>
+      <div class="tilt-control" aria-hidden="true">
+        <span class="tilt-arrow">‹</span>
+        <svg width="24" height="32" viewBox="0 0 24 32" fill="none" stroke="currentColor" stroke-width="1.6"><rect x="4" y="2" width="16" height="28" rx="3"/><path d="M10 26h4"/></svg>
+        <span class="tilt-arrow">›</span>
+      </div>
+      <span id="mechanic-hint" class="bottom-hint">倾斜手机控制金属球 · 桌面端使用 WASD</span>
     </div>
 
-    <!-- 面名提示 -->
     <div id="face-toast" class="toast hidden">
+      <span class="toast-kicker">NEW FACE UNLOCKED</span>
       <span id="face-toast-text"></span>
     </div>
   </div>
 
-  <!-- 翻转转场 -->
   <div id="transition-screen" class="screen">
+    <p class="transition-kicker">FACE COMPLETE</p>
+    <h2 class="transition-title">翻转正方体<br><span>迎接下一面</span></h2>
     <div id="cube-container">
       <div id="cube">
         <div class="cube-face" id="cube-front"></div>
@@ -86,35 +148,35 @@
     </div>
   </div>
 
-  <!-- 通关界面 -->
   <div id="complete-screen" class="screen">
-    <div class="floating-cubes">
-      <div class="cube-deco"></div>
-      <div class="cube-deco"></div>
-      <div class="cube-deco"></div>
-      <div class="cube-deco"></div>
+    <div class="ambient-glow ambient-glow-a"></div>
+    <div class="ambient-glow ambient-glow-b"></div>
+    <div class="floating-cubes" aria-hidden="true">
+      <div class="cube-deco cube-pink"></div>
+      <div class="cube-deco cube-yellow"></div>
+      <div class="cube-deco cube-cyan"></div>
+      <div class="cube-deco cube-green"></div>
     </div>
     <div class="complete-content">
-      <h1 class="complete-title">恭喜通关!</h1>
+      <p class="eyebrow">ALL FACES COMPLETE</p>
+      <h1 class="complete-title">六面通关<span>!</span></h1>
+      <p class="complete-subtitle">你已经翻越整个正方体迷宫。</p>
       <div id="complete-stats">
         <div class="stat-item">
           <span class="stat-label">总用时</span>
           <span id="total-time" class="stat-value">00:00</span>
         </div>
+        <div class="stat-item">
+          <span class="stat-label">完成面数</span>
+          <span class="stat-value">06 / 06</span>
+        </div>
       </div>
-      <button id="btn-restart" class="btn-primary">再来一次</button>
+      <button id="btn-restart" class="btn-primary">
+        <span>再挑战一次</span>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11a8.1 8.1 0 0 0-15.5-2M4 5v4h4"/><path d="M4 13a8.1 8.1 0 0 0 15.5 2M20 19v-4h-4"/></svg>
+      </button>
     </div>
   </div>
-
-  <script>
-    // 全局错误捕获，方便手机调试
-    window.onerror = function(msg, url, line, col, err) {
-      alert('JS错误: ' + msg + '\n行: ' + line);
-    };
-    window.addEventListener('unhandledrejection', function(e) {
-      alert('异步错误: ' + (e.reason && e.reason.message || e.reason));
-    });
-  </script>
-  <script type="module" src="src/main.js"></script>
+  <script type="module" src="/src/main.js"></script>
 </body>
 </html>
